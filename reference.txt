@@ -1,0 +1,50 @@
+# CONFIGURE TABLES
+class BlogPost(db.Model):
+    __tablename__ = "blog_posts"
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(250), unique=True, nullable=False)
+    subtitle = db.Column(db.String(250), nullable=False)
+    date = db.Column(db.String(250), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    author = db.Column(db.String(250), nullable=False)
+    img_url = db.Column(db.String(250), nullable=False) 
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+
+# TODO: Create a User table for all your registered users.  
+    
+class Users(db.Model): 
+    __tablename__ = "users" 
+    id = db.Column(db.Integer, primary_key=True) 
+    firstName = db.Column(db.String(250), nullable=False, unique=False) 
+    lastName = db.Column(db.String(250), nullable=False, unique=False) 
+    email = db.Column(db.String(250), nullable=False, unique=False) 
+    password = db.Column(db.String(250), nullable=False, unique=False)  
+    user_id = relationship('BlogPost', backref='author', lazy=True) 
+    posts = relationship('BlogPost', backref='author', lazy=True) 
+
+
+
+
+
+    class UserForm(FlaskForm):  
+    firstName = StringField("First", validators=[DataRequired()]) 
+    lastName = StringField("Last", validators=[DataRequired()]) 
+    email = EmailField("Email", validators=[DataRequired()]) 
+    password = PasswordField("Password", validators=[DataRequired()])  
+    submit = SubmitField("Submit") 
+    submit = SubmitField("submit")
+
+
+
+# TODO: Create a LoginForm to login existing users  
+class LoginForm(FlaskForm): 
+    email = EmailField("Email", validators=[DataRequired()]) 
+    password = PasswordField("Password", validators=[DataRequired()]) 
+    sumbit = SubmitField("Submit")
+
+
+# TODO: Create a CommentForm so users can leave comments below posts 
+class CommentForm(FlaskForm): 
+    rating =  SelectField('Rating', choices=[(0, 'zero'), (1, 'one'), (2, 'two'), (3, 'three'), (4, 'four'), (5, 'five')], validators=[DataRequired()])
+    comment = CKEditorField('Comment', validators=[DataRequired()])

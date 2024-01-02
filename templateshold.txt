@@ -1,0 +1,341 @@
+register.html 
+
+
+{% from "bootstrap5/form.html" import render_form %} {% block content %} {%
+include "header.html" %}
+
+<!-- Page Header -->
+<header
+  class="masthead"
+  style="background-image: url('../static/assets/img/register-bg.jpg')"
+>
+  <div class="container position-relative px-4 px-lg-5">
+    {% with messages = get_flashed_messages(with_categories=true)%} {% if
+    messages %} {% for message in messages %}
+    <p class="flash-message {{category}}">{{message}}</p>
+
+    {% endfor %} {% endif %} {% endwith %}
+
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+      <div class="col-md-10 col-lg-8 col-xl-7">
+        <div class="page-heading">
+          <h1>Register</h1>
+          <span class="subheading">Start Contributing to the Blog!</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="mb-4">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <!--TODO: render your registration form here-->
+        <form action="{{url_for('register')}}" method="post">
+          {{form.hidden_tag()}} {{form.firstName.label(class="form-label")}}
+          {{form.firstName(class="form-control")}} {% if form.firstName.errors
+          %} {% for error in form.firstName.errors %}
+          <div class="error">{{error}}</div>
+
+          {% endfor %} {% endif %}
+          <br />
+          {{form.lastName.label(class="form-label")}}{{form.lastName(class="form-control")}}
+          <br />
+          {{form.email.label(class="form-label")}}{{form.email(class="form-control")}}
+          {% if form.email.errors %} {% for error in form.email.errors %}
+          <div class="error">{{error}}</div>
+
+          {% endfor %} {% endif %}
+
+          <br />
+          {{form.password.label(class="form-label")}}{{form.password(class="form-control")}}
+          {{form.submit(class="btn btn-primary")}}
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+
+{% include "footer.html" %} {% endblock %}
+
+
+post.html 
+
+
+
+{% include "header.html" %}
+
+<!-- Page Header-->
+<header class="masthead" style="background-image: url('{{post.img_url}}')">
+  <div class="container position-relative px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+      <div class="col-md-10 col-lg-8 col-xl-7">
+        <div class="post-heading">
+          <h1>{{ post.title }}</h1>
+          <h2 class="subheading">{{ post.subtitle }}</h2>
+          <span class="meta"
+            >Posted by
+            <a href="#">{{ post.author }}</a>
+            on {{ post.date }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Post Content -->
+<article>
+  <div class="container px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+      <div class="col-md-10 col-lg-8 col-xl-7">
+        {{ post.body|safe }}
+
+        <!--TODO: Only show Edit Post button if user id is 1 (admin user) -->
+        {% if current_user.is_authenticated and (current_user.id ==
+        post.author_id or current_user.is_admin) %}
+        <div class="d-flex justify-content-end mb-4">
+          <a
+            class="btn btn-primary float-right"
+            href="{{url_for('edit_post', post_id=post.id)}}"
+            >Edit Post</a
+          >
+        </div>
+
+        {% endif %}
+
+        <!-- Comments Area -->
+        <!-- TODO: Add a CKEditor for commenting below -->
+
+        {% if current_user.is_authenticated %}
+        <form action="{{url_for('show_post', post_id=post.id)}}" method="post">
+          {{form.hidden_tag()}}
+          {{form.rating.label(class="form-label")}}{{form.rating(class="form-control")}}
+          <br />
+          {{form.comment.label(class="form-label")}}
+          {{form.comment(class="form-control")}}
+          <br />
+
+          {{form.submit(class="btn btn-primary")}} {% endif %}
+        </form>
+        <div class="comment">
+          <ul class="comment-list">
+            {% for comment in post.comments %}
+            <li>
+              <div class="commenterImage">
+                <img src="../static/assets/img/default-profile.jpg" />
+              </div>
+              <div class="commentText">
+                <p>{{ comment.comment }}</p>
+                <!-- Use 'comment.text' if you rename the field -->
+                <span class="date sub-text"
+                  >by {{ comment.user.firstName }}</span
+                >
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</article>
+
+{% include "footer.html" %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+make-post.html 
+
+{% from "bootstrap5/form.html" import render_form %} {% block content %} {%
+include "header.html" %}
+
+<!-- Page Header -->
+<header
+  class="masthead"
+  style="background-image: url('../static/assets/img/edit-bg.jpg')"
+>
+  <div class="container position-relative px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+      <div class="col-md-10 col-lg-8 col-xl-7">
+        <div class="page-heading">
+          {% if is_edit: %}
+          <h1>Edit Post</h1>
+          {% else: %}
+          <h1>New Post</h1>
+          {% endif %}
+          <span class="subheading"
+            >You're going to make a great blog post!</span
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="mb-4">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        {{ ckeditor.load() }} {{ ckeditor.config(name='body') }} {{
+        render_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+      </div>
+    </div>
+  </div>
+</main>
+{% include "footer.html" %} {% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+index.html 
+
+
+
+{% include "header.html" %}
+
+<!-- Page Header-->
+<header
+  class="masthead"
+  style="background-image: url('../static/assets/img/home-bg.jpg')"
+>
+  <div class="container position-relative px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+      <div class="col-md-10 col-lg-8 col-xl-7">
+        <div class="site-heading">
+          <h1>Overton's Blog</h1>
+          <span class="subheading">A collection of random musings.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+<!-- Main Content-->
+<div class="container px-4 px-lg-5">
+  <div class="row gx-4 gx-lg-5 justify-content-center">
+    <div class="col-md-10 col-lg-8 col-xl-7">
+      <!-- Post preview-->
+      {% for post in all_posts %}
+      <div class="post-preview">
+        <a href="{{ url_for('show_post', post_id=post.id) }}">
+          <h2 class="post-title">{{ post.title }}</h2>
+          <h3 class="post-subtitle">{{ post.subtitle }}</h3>
+        </a>
+        <p class="post-meta">
+          Posted by
+          <a href="#">{{post.author}}</a>
+          on {{post.date}}
+          <!-- TODO: Only show delete button if user id is 1 (admin user) -->
+          {% if current_user.is_authenticated %}
+          <a href="{{url_for('delete_post', post_id=post.id) }}">✘</a>
+          {% endif %}
+        </p>
+      </div>
+      <!-- Divider-->
+      <hr class="my-4" />
+      {% endfor %}
+
+      <!-- New Post -->
+      <!-- TODO: Only show Create Post button if user id is 1 (admin user) -->
+      {% if current_user.is_authenticated %}
+      <div class="d-flex justify-content-end mb-4">
+        <a
+          class="btn btn-primary float-right"
+          href="{{url_for('add_new_post')}}"
+          >Create New Post</a
+        >
+      </div>
+
+      {% endif %}
+
+      <!-- Pager-->
+      <div class="d-flex justify-content-end mb-4">
+        <a class="btn btn-secondary text-uppercase" href="#!">Older Posts →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% include "footer.html" %}
+
+
+
+
+
+
+
+
+
+
+
+login.html 
+
+
+{% from "bootstrap5/form.html" import render_form %} {% block content %} {%
+include "header.html" %}
+
+<!-- Page Header -->
+<header
+  class="masthead"
+  style="background-image: url('../static/assets/img/login-bg.jpg')"
+>
+  <div class="container position-relative px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+      <div class="col-md-10 col-lg-8 col-xl-7">
+        {% with messages = get_flashed_messages(with_categories=true)%} {% if
+        messages %} {% for message in messages %}
+        <p class="flash-message {{category}}">{{message}}</p>
+
+        {% endfor %} {% endif %} {% endwith %}
+        <div class="page-heading">
+          <h1>Log In</h1>
+          <span class="subheading">Welcome Back!</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="mb-4">
+  <div class="container">
+    <div class="row">
+      <!-- TODO: add a flash message here for users registering twice -->
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <form action="{{url_for('login')}}" method="post">
+          {{form.hidden_tag()}}
+          <br />
+          {{form.email.label(class="form-label")}}
+          {{form.email(class="form-control")}}
+          <br />
+          {{form.password.label(class="form-label")}}
+          {{form.password(class="form-control")}}
+          <br />
+          {{form.submit(class="btn btn-primary")}}
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+
+{% include "footer.html" %} {% endblock %}
