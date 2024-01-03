@@ -11,22 +11,9 @@ from sqlalchemy.orm import relationship
 # Import your forms from the forms.py
 from forms import CreatePostForm, CommentForm, LoginForm, UserForm  
 import os
-from dotenv import load_dotenv 
-load_dotenv()
 
 
-'''
-Make sure the required packages are installed: 
-Open the Terminal in PyCharm (bottom left). 
 
-On Windows type:
-python -m pip install -r requirements.txt
-
-On MacOS type:
-pip3 install -r requirements.txt
-
-This will install the packages from the requirements.txt for this project.
-'''
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("FLASK_KEY")
@@ -47,8 +34,6 @@ db.init_app(app)
 login_manager = LoginManager() 
 login_manager.init_app(app)  
 
-        
-migrate = Migrate(app, db)
 
 # CONFIGURE TABLES
 class BlogPost(db.Model):
